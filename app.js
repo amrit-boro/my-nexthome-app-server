@@ -2,9 +2,12 @@ const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
 
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 const AppError = require("./utils/appError");
 const globalErrorHandler = require("./controllers/ErrorController/errorController");
 const pgrouter = require("./router/pgRouter/pgRouter");
+const aiRouter = require("./router/aiRouter/airouter");
 const pgSearch = require("./router/pgRouter/pgSearchRoter");
 const rentrouter = require("./router/rentRouter");
 const apartmentrouter = require("./router/apartmentRouter");
@@ -54,6 +57,9 @@ app.use("/api/v1/pgs/search", pgSearch);
 app.use("/api/v1/rent", rentrouter);
 app.use("/api/v1/apartment", apartmentrouter);
 app.use("/api/v1/localHouse", localrouter);
+
+// AI-INTEGREATION------------------------------------------------------------------------------
+app.use("/api/v1/ai", aiRouter);
 
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl}`, 404));

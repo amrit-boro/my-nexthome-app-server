@@ -14,6 +14,8 @@ router.get("/getAllpg", pgController.getAllPGroom);
 router.use(authController.protect, authController.restricTo("Admin"));
 
 router.get("/getSinglePg", pgController.getPg);
+router.get("/getSinglePg/:id", pgController.getPgById);
+
 // pg photo upload--------------------------
 router.post(
   "/uploadPgphoto",

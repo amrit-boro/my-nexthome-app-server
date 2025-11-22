@@ -363,6 +363,58 @@ class PgRepo {
       throw err;
     }
   }
+
+  static async getPgdetailById(productid) {
+    const pgQuery = `
+    SELECT COALESCE(json_agg(prop), '[]'::json) AS properties
+    FROM (
+      SELECT
+        p.property_id,
+        p.user_id,
+        p.title,
+        p.address_line_1 AS address,
+        p.city,
+        p.area_name AS areaName,
+        p.description,
+        p.monthly_rent_base AS monthlyFees,
+        p.is_deposit_refundable AS refundable,
+        p.status,
+        p.near_me AS nearMe,
+
+        COALESCE((
+          SELECT json_agg(DISTINCT a.amenity_name)
+          FROM property_amenities pa
+          JOIN pg_amenities a ON a.amenity_id = pa.amenity_id
+          WHERE pa.property_id = p.property_id
+        ), '[]'::json) AS included_amenities,
+
+        COALESCE((
+          SELECT json_agg(DISTINCT ph.image_url)
+          FROM pg_photos ph
+          WHERE ph.property_id = p.property_id
+        ), '[]'::json) AS images
+
+      FROM pg_properties p
+      WHERE p.property_id = $1       
+    ) prop;
+  `;
+    try {
+      const { rows, rowCount } = await pool.query(pgQuery, [productid]);
+      // console.log(rowCount);
+      // console.log(rows);
+      const result = rows[0]?.properties;
+      if (rowCount === 0 || !result || result.length === 0) {
+        throw new AppError(`No property found with ID ${productid}`, 404);
+      }
+      return result;
+    } catch (err) {
+      console.log("Error fetching pgDetail", err);
+      if (err instanceof AppError) {
+        throw err;
+      }
+      throw new AppError("Error fetching pgDetails", 500);
+    }
+  }
 }
 
 module.exports = PgRepo;

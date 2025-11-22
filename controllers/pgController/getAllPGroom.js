@@ -231,3 +231,14 @@ exports.updatePgdetails = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+exports.getPgById = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const result = await pgRepo.getPgdetailById(id);
+  res.status(200).json({
+    status: "success",
+    data: {
+      result,
+    },
+  });
+});
